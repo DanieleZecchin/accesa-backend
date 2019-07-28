@@ -1,0 +1,33 @@
+<apex:page controller="c_AccountMembers" applyHtmlTag="false" sidebar="false" showHeader="false" standardStylesheets="false" >
+  
+    <table class="table table--user-management">
+        <thead>
+            <tr class="table__head">
+                <th class="table__header data--user-name">{{pageLabelMap 'prt_MyAccount_First_Name'}}, {{pageLabelMap 'prt_MyAccount_Last_Name'}}</th>
+                <th class="table__header data--is-main-user">{{pageLabelMap 'prt_MyAccount_Main_User'}}</th>
+                <th class="table__header data--role">{{pageLabelMap 'prt_MyAccount_Role'}}</th>
+                <th class="table__header data--record-actions"></th>
+            </tr>
+        </thead>
+        <tbody>
+     <apex:repeat value="{!contacts}" var="item" >
+         	<tr class="table__row table__row--is-main-user">
+                <td class="table__data data--user-name" ><apex:outputText value="{!item.firstname}" />&nbsp;<apex:outputText value="{!item.lastname}" /></td>
+                <td class="table__data data--is-main-user"> <apex:outputText rendered="{!item.prt_MainContact__c=true}">✓</apex:outputText> </td>
+                <td class="table__data data--role"><apex:outputText value="{!item.prt_Function__c}" /></td>
+                <td class="table__data data--record-actions">
+                    <button class="action action--edit" data-sfid="{!item.firstname}">{{pageLabelMap 'prt_MyAccount_Button_Edit'}}</button>
+                	<button class="action action--edit" data-sfid="{!item.firstname}">Revoke</button>
+                </td>
+            </tr>
+           
+           </apex:repeat> 
+        </tbody>
+    </table>
+    <br />
+               <button class="btn btn-default register cc_register_modal" data-toggle="modal" data-target="#wishModal" name="" type="button">
+               {{pageLabelMap 'prt_MyAccount_Button_Add_User'}}
+               </button>
+ 
+    
+</apex:page>

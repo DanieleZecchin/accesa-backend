@@ -1,0 +1,140 @@
+<apex:page docType="html-5.0" sidebar="false" showHeader="false" standardStylesheets="false" applyHtmlTag="false">
+    <script>
+     CCRZ.uiProperties.contactInfoView.desktop.tmpl = 'CCTrainingMyAccount-ContactInformation-Desktop'; 
+     CCRZ.uiProperties.contactInfoEditView.desktop.tmpl = 'CCTrainingMyAccount-ContactInformationEdit-Desktop'; 
+   	
+    </script>
+        
+   <script id="CCTrainingMyAccount-ContactInformation-Desktop" type="text/template">
+      <div class="panel panel-default cc_panel cc_myaccount_profile">
+        <div class="panel-body cc_body cc_myaccount_content">
+          <h3 class="cc_title">{{pageLabelMap 'MyAccount_Profile'}}</h3>
+          {{#ifEquals this.commerceType "B2B"}}
+          
+             
+          <div class="panel panel-default cc_panel cc_myaccount_user_information">
+            <div class="panel-heading cc_heading">
+              <h3 class="panel-title cc_title">{{pageLabelMap 'MyAccount_Profile_User_Information'}}</h3>
+            </div>
+            <div class="panel-body cc_body cc_myaccount_user">
+              <p class="myAccName cc_name">
+                <span class="cc_profile_name_label">{{pageLabelMap 'MyAccount_Profile_Name'}}&#58;</span>
+                <span class="cc_profile_name_value">{{userFirstName}} {{userLastName}}</span>
+              </p>
+              <p class="myAccPhone cc_acct_phone">
+                <span class="cc_acct_phone_label">{{pageLabelMap 'MyAccount_Profile_Phone'}}&#58;</span>
+                <span class="cc_acct_phone_value">{{userPhone}}</span>
+              </p>
+              
+              <p class="myAccEmailAddr cc_acct_email">
+                <span class="cc_acct_email_label">{{pageLabelMap 'MyAccount_Profile_Email'}}&#58;</span>
+                <span class="cc_acct_email_value">{{emailAddress}}</span>
+              </p>
+              
+          
+          </div>
+          {{/ifEquals}}
+          {{#if hideEditProfile}}
+          {{else}}
+            <input type="button" class="btn btn-default btn-sm gotoSectionContactInfoEdit cc_edit_profile" value="{{pageLabelMap 'MyAccount_EditProfile'}}" />
+          {{/if}}
+        
+    </div>
+           
+           </div>
+          
+ </script>
+      <script id="CCTrainingMyAccount-ContactInformationEdit-Desktop" type="text/template">
+
+    <div class="panel panel-default cc_panel cc_myaccount_profile">
+    <div class="panel-body cc_body cc_myaccount_content">
+     <h3 class="title cc_title">{{pageLabelMap 'MyAccount_Profile'}}</h3>
+
+      {{#ifEquals this.commerceType "B2B"}}
+          
+             
+          <div class="panel panel-default cc_panel cc_myaccount_user_information">
+            <div class="panel-heading cc_heading">
+              <h3 class="panel-title cc_title">{{pageLabelMap 'MyAccount_Profile_User_Information'}}</h3>
+            </div>
+            <div class="panel-body cc_body cc_myaccount_user">
+              <p class="myAccName cc_name">
+                <span class="cc_profile_name_label">{{pageLabelMap 'MyAccount_Profile_Name'}}&#58;</span>
+                <span class="cc_profile_name_value">{{userFirstName}} {{userLastName}}</span>
+              </p>
+              <p class="myAccPhone cc_acct_phone">
+                <span class="cc_acct_phone_label">{{pageLabelMap 'MyAccount_Profile_Phone'}}&#58;</span>
+                <span class="cc_acct_phone_value">{{userPhone}}</span>
+              </p>
+              
+              <p class="myAccEmailAddr cc_acct_email">
+                <span class="cc_acct_email_label">{{pageLabelMap 'MyAccount_Profile_Email'}}&#58;</span>
+                <span class="cc_acct_email_value">{{emailAddress}}</span>
+              </p>
+              
+          
+          </div>
+          </div>      
+          {{/ifEquals}}
+          
+     <form id="myAccountForm" class="cc_edit_account_form">
+      <div class="panel panel-default cc_panel cc_myaccount_edit_user_information">
+       <div class="panel-heading cc_heading">
+        <h3 class="panel-title cc_title">{{pageLabelMap 'MyAccount_Profile_User_Information'}}</h3>
+       </div>
+       <div class="panel-body cc_body cc_myaccount_edit_user">
+             <div class="error_update_contact cc_error_update_contact" style="display: none"></div>
+             <div class="form-group">
+         <label class="cc_contact_input_other_firstname_label" for="userFirstName">{{pageLabelMap 'MyAccount_Profile_FirstName'}}</label>
+         <input id="userFirstName" type="text" class="form-control contactInput cc_contact_input_firstname" name="userFirstName" maxlength=40 value="{{userFirstName}}" />
+        </div>
+        <div class="form-group">
+         <label class="cc_contact_input_lastname_label" for="userLastName">{{pageLabelMap 'MyAccount_Profile_LastName'}}</label>
+         <input id="userLastName" type="text" class="form-control contactInput cc_contact_input_lastname" name="userLastName" maxlength=40 value="{{userLastName}}" />
+        </div>
+        <div class="form-group">
+         <label class="cc_contact_input_phone_label" for="userPhone">{{pageLabelMap 'MyAccount_Profile_Phone_Edit'}}</label>
+         <input id="userPhone" type="text" class="form-control contactInput cc_contact_input_phone" name="userPhone" maxlength=40 value="{{userPhone}}" />
+        </div>
+        <div class="form-group">
+         <input id="username" type="hidden" class="form-control contactInput cc_contact_input_username" name="username" maxlength=40 value="{{username}}" />
+        </div>
+        <div class="form-group">
+         <label class="cc_contact_input_email_label" for="email">{{pageLabelMap 'MyAccount_Profile_Email_Edit'}}</label>
+         <input id="email" type="text" class="form-control contactInput cc_contact_input_email" name="emailAddress" value="{{emailAddress}}" maxlength=40 />
+        </div>
+        <div class="form-group" style="display:none">
+         <label class="cc_contact_input_language_label" for="language">{{pageLabelMap 'MyAccount_Profile_Language_Edit'}}</label>
+         <select name="language" value="{{this.language}}" class="form-control cc_user_language">
+          {{#each this.languageList}}
+           {{#ifEquals this.label ../language}}
+            <option value="{{this.value}}" selected>{{this.label}}</option>
+           {{else}}
+            <option value="{{this.value}}">{{this.label}}</option>
+           {{/ifEquals}}
+          {{/each}}
+         </select>
+        </div>
+        <div class="form-group" style="display:none">
+         <label class="cc_contact_input_currencycode_label" for="currencyCode">{{pageLabelMap 'MyAccount_Profile_Currency_Edit'}}</label>
+         <select name="currencyCode" value="{{this.currencyCode}}" class="form-control cc_currency_code">
+          {{#each this.currencyList}}
+           {{#ifEquals this.value ../currencyCode}}
+            <option value="{{this.value}}" selected>{{this.label}}</option>
+           {{else}}
+            <option value="{{this.value}}">{{this.label}}</option>
+           {{/ifEquals}}
+          {{/each}}
+         </select>
+        </div>
+       </div>
+      </div>
+     </form>
+     <div class="form-group">
+      <input type="button" class="btn btn-default btn-sm closeEditProfile cc_close_edit_profile" value="{{pageLabelMap 'Cancel'}}" />
+      <input type="button" class="btn btn-default btn-sm updateProfile cc_update_profile" value="{{pageLabelMap 'Save'}}" />
+     </div>
+    </div>
+   </div>
+  </script>
+</apex:page>

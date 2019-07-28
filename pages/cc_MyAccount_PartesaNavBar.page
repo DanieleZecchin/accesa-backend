@@ -1,0 +1,331 @@
+<apex:page applyHtmlTag="false" sidebar="false" showHeader="false" standardStylesheets="false" controller="c_Prt_ContactController">
+
+<script id="MyAccount-MyCompany" type="text/template">
+	<h2 class="title">{{pageLabelMap 'prt_MyAccount_CompanyMembers'}}</h2>
+	<h4>{{pageLabelMap 'prt_MyAccount_Company_User'}}</h4>
+	<div class="alert alert-error messagingSection-orderhistory-Error" style="display: none"></div>
+	<div class="alert alert-info messagingSection-orderhistory-Info" style="display: none"></div>
+	<div class="main_content_large_right_container">
+
+	<apex:include pageName="cc_myAccountPartesaMembers"/>
+	<apex:include pageName="c_Prt_EditCompanyUser"/>
+	<apex:include pageName="c_Prt_NewCompanyUser"/>
+</script>
+
+<script id="MyAccount-Profile" type="text/template">
+	<h2 class="title">{{pageLabelMap 'MyAccount_Profile'}}</h2>
+	<div class="alert alert-error messagingSection-orderhistory-Error" style="display: none"></div>
+	<div class="alert alert-info messagingSection-orderhistory-Info" style="display: none"></div>
+	<div class="main_content_large_right_container">
+	
+	<apex:include pageName="c_prt_MyAccout"/>
+</script>
+
+<script>
+CCRZ.MyAccount = _.extend(CCRZ.MyAccount||{},{
+	SubscMyCompany : {
+		register : function(registrar) {
+			registrar.registerNewView('myCompany', CCRZ.
+			processPageLabelMap('prt_MyAccount_CompanyMembers'), new CCRZ.views.
+			SubscMyCompanyView());
+		}
+	}
+});
+
+jQuery(function($) {
+	CCRZ.views.SubscMyCompanyView = CCRZ.CloudCrazeView.extend({
+		templatePhone : CCRZ.util.template('MyAccount-MyCompany'),
+		templateDesktop : CCRZ.util.template('MyAccount-MyCompany'),
+		managedSubView : true,
+		viewName : "SubscMyCompanyView",
+		initSetup : function(callback) {callback();},
+		events : {
+			"click .cc_register_modal" : "createEntity",
+			"click .action--edit" : "editEntity",
+		},
+		createEntity: function() {
+			$("#createAccountMod").modal('show');
+		},
+
+		editEntity: function() {
+			alert('open windows');
+			$(document).on('click', 'button.action--edit',function(event) {
+				var id = $(this).data('sfid'); 
+			});
+			alert(id);
+
+			CCRZ.subsc = _.extend(CCRZ.subsc||{});
+			CCRZ.subsc.editAccountRemoteActions = _.extend({
+				className : 'c_Prt_ContactController',
+				editMembersAction : function(callback) {
+					this.invokeCtx('editMembers',
+						function(resp)
+						{
+							callback(resp);
+						},
+						{
+							buffer : false, // this call will be executed by itself
+							nmsp   : false  // defines that this is a call to a subscriber class
+						}); // end invokeCtx call
+				}
+			},CCRZ.RemoteInvocation);
+
+			$("#EditAccountMod").modal('show');
+		},
+
+		renderPhone : function() {
+			this.$el.html(this.templatePhone(this));
+		},
+		renderDesktop : function() {
+			this.$el.html(this.templateDesktop(this));
+		}
+	});
+});
+</script>
+    
+<script>
+CCRZ.MyAccount = _.extend(CCRZ.MyAccount||{},{
+	SubscMyAzienda :{
+		register : function(registrar){
+			registrar.registerNewView('myCompany', CCRZ.
+			processPageLabelMap('prt_MyAccount_CompanyProfile'), new CCRZ.views.
+			SubscMyCompanyProfileView());
+		}
+	}
+});
+
+jQuery(function($) {
+	CCRZ.views.SubscMyCompanyProfileView = CCRZ.CloudCrazeView.extend({
+		templatePhone : CCRZ.util.template('MyAccount-Profile'),
+		templateDesktop : CCRZ.util.template('MyAccount-Profile'),
+		managedSubView : true,
+		viewName : "SubscMyCompanyProfileView",
+		initSetup : function(callback){
+			callback();
+		},
+		renderPhone : function() {
+			this.$el.html(this.templatePhone(this));
+		},
+		renderDesktop : function() {
+			this.$el.html(this.templateDesktop(this));
+		}
+	});
+});
+</script>
+    
+
+<script type="text/javascript">
+jQuery(function($){
+//pubSub listener, called when the My Account view needs to initialize theside menu
+CCRZ.pubSub.on('view:myaccountView:awaitingSubViewInit', function(viewRef) {
+//pubSub listener function, viewRef is the Backbone view for My Account
+    
+
+    
+if(CCRZ.MyAccount.myOrders){
+CCRZ.MyAccount.myOrders.register(viewRef);
+}
+if(CCRZ.MyAccount.myWishlists){
+CCRZ.MyAccount.myWishlists.register(viewRef);
+}
+if(CCRZ.MyAccount.mySection){
+CCRZ.MyAccount.mySection.register(viewRef);
+}
+    
+    
+// IL MIO PROFILO
+if (CCRZ.MyAccount.contactInfo) {
+CCRZ.MyAccount.contactInfo.register(viewRef);
+}
+    
+// LA MIA AZIENDA - PROFILO AZIENDALE
+if(CCRZ.MyAccount.SubscMyCompany){
+CCRZ.MyAccount.SubscMyAzienda.register(viewRef);
+}
+
+// LA MIA AZIENDA - GESTIONE UTENTI
+if(CCRZ.MyAccount.SubscMyCompany){
+CCRZ.MyAccount.SubscMyCompany.register(viewRef);
+}
+    
+// CAMBIO PASSWORD
+if (CCRZ.MyAccount.changePassword){
+CCRZ.MyAccount.changePassword.register(viewRef);
+}
+    
+    
+//Tell the My Account view that it should proceed with rendering the view
+CCRZ.pubSub.trigger("view:myaccountView:subViewInit", true);
+    // CCRZ.headerView.init();
+    CCRZ.headerView.prepAndRender();
+    //    CCRZ.headerView.renderFinish();  
+});
+});
+</script>
+    
+<script>
+CCRZ.uiProperties.contactInfoView.desktop.tmpl = 'CCTrainingMyAccount-ContactInformation-Desktop'; 
+CCRZ.uiProperties.contactInfoEditView.desktop.tmpl = 'CCTrainingMyAccount-ContactInformationEdit-Desktop'; 
+CCRZ.uiProperties.myAccountNavView.desktop.tmpl = "Partesa-MyAccount-Nav-Desktop";   	
+</script>
+    
+    
+<script id="Partesa-MyAccount-Nav-Desktop" type="text/template">
+	<div class="panel panel-default cc_panel cc_myaccount_nav">
+	<div class="panel-heading cc_heading">
+		<h3 class="panel-title cc_title">{{pageLabelMap 'Component_SiteHeader_MyAccount'}}</h3>
+	</div>
+	<ul class="side_navigation_dropdown list-group cc_myaccount_nav_list" id="side_nav">
+		{{#each this}}
+			<li class="acctStep{{this.index}} acctStepNav list-group-item cc_acc_step_nav">
+				{{#ifEquals this.index '1'}}
+						<a href="#" class="gotoSection  red cc_goto_section" data-index="{{this.index}}">  {{{pageLabelMap 'prt_MyAccount_MyCompany'}}}</a>
+                        </li>
+                        <li class="acctStep{{this.index}} acctStepNav list-group-item cc_acc_step_nav">
+						<a href="#" class="gotoSection  red cc_goto_section" data-index="{{this.index}}">  {{{pageLabelMap this.title}}}</a>
+				{{else}}
+					<a href="#" class="gotoSection cc_goto_section" data-index="{{this.index}}">{{{pageLabelMap this.title}}}</a>
+				{{/ifEquals}}
+			</li>
+		{{/each}}
+	</ul>
+	</div>
+</script>
+        
+<script id="CCTrainingMyAccount-ContactInformation-Desktop" type="text/template">
+<div class="panel panel-default cc_panel cc_myaccount_profile">
+<div class="panel-body cc_body cc_myaccount_content">
+
+	<h3 class="cc_title">{{pageLabelMap 'MyAccount_Profile'}}</h3>
+
+	{{#ifEquals this.commerceType "B2B"}}
+	<div class="panel panel-default cc_panel cc_myaccount_user_information">
+		<div class="panel-heading cc_heading">
+			<h3 class="panel-title cc_title">{{pageLabelMap 'MyAccount_Profile_User_Information'}}</h3>
+		</div>
+		<div class="panel-body cc_body cc_myaccount_user">
+
+			<p class="myAccName cc_name">
+				<span class="cc_profile_name_label">{{pageLabelMap 'MyAccount_Profile_Name'}}&#58;</span>
+				<span class="cc_profile_name_value">{{userFirstName}} {{userLastName}}</span>
+			</p>
+
+			<p class="myAccPhone cc_acct_phone">
+				<span class="cc_acct_phone_label">{{pageLabelMap 'MyAccount_Profile_Phone'}}&#58;</span>
+				<span class="cc_acct_phone_value">{!mobilePhone}</span>
+			</p>
+
+			<p class="myAccEmailAddr cc_acct_email">
+				<span class="cc_acct_email_label">{{pageLabelMap 'MyAccount_Profile_Email'}}&#58;</span>
+				<span class="cc_acct_email_value">{{emailAddress}}</span>
+			</p>
+
+		</div>
+	</div>
+	{{/ifEquals}}
+	{{#if hideEditProfile}}
+	{{else}}
+	<input type="button" class="btn btn-default btn-sm gotoSectionContactInfoEdit cc_edit_profile" value="{{pageLabelMap 'MyAccount_EditProfile'}}" />
+	{{/if}}
+	
+</div>
+</div>
+</script>
+
+<script id="CCTrainingMyAccount-ContactInformationEdit-Desktop" type="text/template">
+<div class="panel panel-default cc_panel cc_myaccount_profile">
+<div class="panel-body cc_body cc_myaccount_content">
+
+	<h3 class="title cc_title">{{pageLabelMap 'MyAccount_Profile'}}</h3>
+
+	{{#ifEquals this.commerceType "B2B"}}
+		<div class="panel panel-default cc_panel cc_myaccount_user_information">
+			<div class="panel-heading cc_heading">
+				<h3 class="panel-title cc_title">{{pageLabelMap 'MyAccount_Profile_User_Information'}}</h3>
+			</div>
+			<div class="panel-body cc_body cc_myaccount_user">
+			
+				<p class="myAccName cc_name">
+				<span class="cc_profile_name_label">{{pageLabelMap 'MyAccount_Profile_Name'}}&#58;</span>
+				<span class="cc_profile_name_value">{{userFirstName}} {{userLastName}}</span>
+				</p>
+				
+				<p class="myAccPhone cc_acct_phone">
+				<span class="cc_acct_phone_label">{{pageLabelMap 'MyAccount_Profile_Phone'}}&#58;</span>
+				<span class="cc_acct_phone_value">{!mobilePhone}</span>
+				</p>
+
+				<p class="myAccEmailAddr cc_acct_email">
+				<span class="cc_acct_email_label">{{pageLabelMap 'MyAccount_Profile_Email'}}&#58;</span>
+				<span class="cc_acct_email_value">{{emailAddress}}</span>
+				</p>
+
+			</div>
+		</div>      
+	{{/ifEquals}}
+  
+	<form id="myAccountForm" class="cc_edit_account_form popup">
+	<div class="popup__background">
+	<div class="panel panel-default cc_panel cc_myaccount_edit_user_information popup__content">
+		<div class="panel-heading cc_heading">
+		<h3 class="panel-title cc_title">{{pageLabelMap 'MyAccount_Profile_User_Information'}}</h3>
+		</div>
+		<div class="panel-body cc_body cc_myaccount_edit_user">
+			<div class="error_update_contact cc_error_update_contact" style="display: none"></div>
+			<div class="form-group">
+			 <label class="cc_contact_input_other_firstname_label" for="userFirstName">{{pageLabelMap 'MyAccount_Profile_FirstName'}}</label>
+			 <input id="userFirstName" type="text" class="form-control contactInput cc_contact_input_firstname" name="userFirstName" maxlength=40 value="{{userFirstName}}" />
+			</div>
+			<div class="form-group">
+			 <label class="cc_contact_input_lastname_label" for="userLastName">{{pageLabelMap 'MyAccount_Profile_LastName'}}</label>
+			 <input id="userLastName" type="text" class="form-control contactInput cc_contact_input_lastname" name="userLastName" maxlength=40 value="{{userLastName}}" />
+			</div>
+			<div class="form-group">
+			 <label class="cc_contact_input_phone_label" for="userPhone">{{pageLabelMap 'MyAccount_Profile_Phone_Edit'}}</label>
+			 <input id="userPhone" type="tel" pattern="^\+?[0-9]*" class="form-control contactInput cc_contact_input_phone" name="userPhone" maxlength=40 value="{!mobilePhone}" />
+			</div>
+			<div class="form-group">
+			 <input id="username" type="hidden" class="form-control contactInput cc_contact_input_username" name="username" maxlength=40 value="{{username}}" />
+			</div>
+			<div class="form-group">
+			 <label class="cc_contact_input_email_label" for="email">{{pageLabelMap 'MyAccount_Profile_Email_Edit'}}</label>
+			 <input id="email" type="email" class="form-control contactInput cc_contact_input_email" name="emailAddress" value="{{emailAddress}}" maxlength=40 />
+			</div>
+			<div class="form-group" style="display:none">
+			 <label class="cc_contact_input_language_label" for="language">{{pageLabelMap 'MyAccount_Profile_Language_Edit'}}</label>
+			 <select name="language" value="{{this.language}}" class="form-control cc_user_language">
+			  {{#each this.languageList}}
+			   {{#ifEquals this.label ../language}}
+				<option value="{{this.value}}" selected>{{this.label}}</option>
+			   {{else}}
+				<option value="{{this.value}}">{{this.label}}</option>
+			   {{/ifEquals}}
+			  {{/each}}
+			 </select>
+			</div>
+			<div class="form-group" style="display:none">
+			 <label class="cc_contact_input_currencycode_label" for="currencyCode">{{pageLabelMap 'MyAccount_Profile_Currency_Edit'}}</label>
+			 <select name="currencyCode" value="{{this.currencyCode}}" class="form-control cc_currency_code">
+			  {{#each this.currencyList}}
+			   {{#ifEquals this.value ../currencyCode}}
+				<option value="{{this.value}}" selected>{{this.label}}</option>
+			   {{else}}
+				<option value="{{this.value}}">{{this.label}}</option>
+			   {{/ifEquals}}
+			  {{/each}}
+			 </select>
+			</div>
+		</div>
+		<div class="form-group">
+			<input type="button" class="btn btn-default btn-sm closeEditProfile cc_close_edit_profile" value="{{pageLabelMap 'Cancel'}}" />
+			<input type="button" class="btn btn-default btn-sm updateProfile cc_update_profile" value="{{pageLabelMap 'Save'}}" />
+		</div>       
+	</div>
+	</div>
+	</form>
+
+</div>
+</div>
+</script>
+
+</apex:page>
