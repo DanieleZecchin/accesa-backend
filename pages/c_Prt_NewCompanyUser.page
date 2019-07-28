@@ -52,7 +52,7 @@
           </div>  
       <div class="form-group">
       <input type="button" class="btn btn-default btn-sm closeEditProfile cc_close_edit_profile" value="{{pageLabelMap 'prt_MyAccount_NewCompanyUser_Button_Cancel'}}" />
-      <input name="" type="button" value="{{pageLabelMap 'prt_MyAccount_NewCompanyUser_Button_Submit'}}" class="btn btn-default" onclick="RemoteTest();" />
+      <input name="" type="button" value="{{pageLabelMap 'prt_MyAccount_NewCompanyUser_Button_Submit'}}" class="btn btn-default "  />
      </div>       
       </div>
      

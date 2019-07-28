@@ -33,6 +33,8 @@ CCRZ.MyAccount = _.extend(CCRZ.MyAccount||{},{
 });
 
 jQuery(function($) {
+    //  CCRZ.pubSub.on('view:myaccountView:subViewInit', console.log); 
+          
 	CCRZ.views.SubscMyCompanyView = CCRZ.CloudCrazeView.extend({
 		templatePhone : CCRZ.util.template('MyAccount-MyCompany'),
 		templateDesktop : CCRZ.util.template('MyAccount-MyCompany'),
@@ -41,7 +43,7 @@ jQuery(function($) {
 		initSetup : function(callback) {callback();},
 		events : {
 			"click .cc_register_modal" : "createEntity",
-			"click .action--edit" : "editEntity",
+			"click .action--editContact" : "editEntity",
 		},
 		createEntity: function() {
 			$("#createAccountMod").modal('show');
@@ -49,28 +51,48 @@ jQuery(function($) {
 
 		editEntity: function() {
 			alert('open windows');
-			$(document).on('click', 'button.action--edit',function(event) {
-				var id = $(this).data('sfid'); 
-			});
-			alert(id);
+            var sfid = $("button.action--editContact").data('idedit'); 
+            alert(sfid);
+            console.log(CCRZ.subsc);
+            CCRZ.subsc = _.extend(CCRZ.subsc||{}); 
+            console.log(CCRZ.subsc);
+        
+            CCRZ.subsc.createEditCaseAction = _.extend({
+                className : 'c_displaypopup',
+                EditCaseAction : function(callback)
+                {
+                    alert('click');
+                    this.invokeCtx('createEditCase',
+                        function(resp)
+                        {
+                            callback(resp);
+                        },
+                        {
+                            buffer : false, // this call will be executed by itself
+                            nmsp   : false  // defines that this is a call to a subscriber class
+                        }); // end invokeCtx call
+                 }
+           	},CCRZ.RemoteInvocation);
+           
+            
+           CCRZ.pubSub.on('view', function(EditDetailView) 
+             {
+          EditDetailView.EditCaseAction = function(event)  
+           {
+               CCRZ.subsc.createEditCaseAction.EditCaseAction(function(resp)
+                {
+                  if(resp && resp.success)
+                  {
+                      alert(resp);
+              
+                  }
+                });
+            };
 
-			CCRZ.subsc = _.extend(CCRZ.subsc||{});
-			CCRZ.subsc.editAccountRemoteActions = _.extend({
-				className : 'c_Prt_ContactController',
-				editMembersAction : function(callback) {
-					this.invokeCtx('editMembers',
-						function(resp)
-						{
-							callback(resp);
-						},
-						{
-							buffer : false, // this call will be executed by itself
-							nmsp   : false  // defines that this is a call to a subscriber class
-						}); // end invokeCtx call
-				}
-			},CCRZ.RemoteInvocation);
-
-			$("#EditAccountMod").modal('show');
+            //  SubscMyCompanyView.events['click .action--editContact'] = 'createEditCase'; 
+                 //   SubscMyCompanyView.delegateEvents(); 
+        });
+      $("#EditAccountMod").modal('show');
 		},
 
 		renderPhone : function() {
@@ -80,6 +102,8 @@ jQuery(function($) {
 			this.$el.html(this.templateDesktop(this));
 		}
 	});
+  CCRZ.pubSub.on('view:myaccountView:subViewInit', function(event) { console.log('pippoooooooooooooo',event)}); 
+      
 });
 </script>
     
@@ -179,10 +203,10 @@ CCRZ.uiProperties.myAccountNavView.desktop.tmpl = "Partesa-MyAccount-Nav-Desktop
 		{{#each this}}
 			<li class="acctStep{{this.index}} acctStepNav list-group-item cc_acc_step_nav">
 				{{#ifEquals this.index '1'}}
-						<a href="#" class="gotoSection  red cc_goto_section" data-index="{{this.index}}">  {{{pageLabelMap 'prt_MyAccount_MyCompany'}}}</a>
-                        </li>
-                        <li class="acctStep{{this.index}} acctStepNav list-group-item cc_acc_step_nav">
-						<a href="#" class="gotoSection  red cc_goto_section" data-index="{{this.index}}">  {{{pageLabelMap this.title}}}</a>
+						<a href="#" class="gotoSection cc_goto_section not_clickable" data-index="{{this.index}}">{{{pageLabelMap 'prt_MyAccount_MyCompany'}}}</a>
+                     </li>
+                     <li class="acctStep{{this.index}} acctStepNav list-group-item cc_acc_step_nav">
+						<a href="#" class="gotoSection cc_goto_section" data-index="{{this.index}}">{{{pageLabelMap this.title}}}</a>
 				{{else}}
 					<a href="#" class="gotoSection cc_goto_section" data-index="{{this.index}}">{{{pageLabelMap this.title}}}</a>
 				{{/ifEquals}}
@@ -207,7 +231,7 @@ CCRZ.uiProperties.myAccountNavView.desktop.tmpl = "Partesa-MyAccount-Nav-Desktop
 
 			<p class="myAccName cc_name">
 				<span class="cc_profile_name_label">{{pageLabelMap 'MyAccount_Profile_Name'}}&#58;</span>
-				<span class="cc_profile_name_value">{{userFirstName}} {{userLastName}}</span>
+				<span class="cc_profile_name_value">{!firstName} {!lastName}</span>
 			</p>
 
 			<p class="myAccPhone cc_acct_phone">
@@ -217,7 +241,7 @@ CCRZ.uiProperties.myAccountNavView.desktop.tmpl = "Partesa-MyAccount-Nav-Desktop
 
 			<p class="myAccEmailAddr cc_acct_email">
 				<span class="cc_acct_email_label">{{pageLabelMap 'MyAccount_Profile_Email'}}&#58;</span>
-				<span class="cc_acct_email_value">{{emailAddress}}</span>
+				<span class="cc_acct_email_value">{!email}</span>
 			</p>
 
 		</div>
