@@ -1,5 +1,10 @@
 global class c_displaypopup {
  @RemoteAction
+    global static String createEditCase(String a) 
+    {
+        return a;
+    }
+    /*
     global static ccrz.cc_RemoteActionResult createEditCase(final ccrz.cc_RemoteActionContext ctx) 
     {
         ccrz.cc_RemoteActionResult res = ccrz.cc_CallContext.init(ctx); 
@@ -17,5 +22,6 @@ global class c_displaypopup {
 
         return res;
     }
+    */
   
 }

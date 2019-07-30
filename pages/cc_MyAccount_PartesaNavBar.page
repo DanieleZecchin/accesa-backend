@@ -33,8 +33,7 @@ CCRZ.MyAccount = _.extend(CCRZ.MyAccount||{},{
 });
 
 jQuery(function($) {
-    //  CCRZ.pubSub.on('view:myaccountView:subViewInit', console.log); 
-          
+
 	CCRZ.views.SubscMyCompanyView = CCRZ.CloudCrazeView.extend({
 		templatePhone : CCRZ.util.template('MyAccount-MyCompany'),
 		templateDesktop : CCRZ.util.template('MyAccount-MyCompany'),
@@ -44,55 +43,140 @@ jQuery(function($) {
 		events : {
 			"click .cc_register_modal" : "createEntity",
 			"click .action--editContact" : "editEntity",
+            "click .cc_contact_edit_profile" : "createSubmitEntity",
 		},
 		createEntity: function() {
-			$("#createAccountMod").modal('show');
-		},
-
-		editEntity: function() {
-			alert('open windows');
-            var sfid = $("button.action--editContact").data('idedit'); 
-            alert(sfid);
-            console.log(CCRZ.subsc);
-            CCRZ.subsc = _.extend(CCRZ.subsc||{}); 
-            console.log(CCRZ.subsc);
+         	$("#createAccountMod").modal('show');
+		}, 
         
-            CCRZ.subsc.createEditCaseAction = _.extend({
-                className : 'c_displaypopup',
+        createSubmitEntity: function() {
+          var firstName= $('#edituserFirstName').val();
+		  var secondName= $('#edituserLastName').val();
+		  var phone= $('#edituserPhone').val();
+		  var email =$('#editemail').val();
+		  var mobile =$('#editMobilePhone').val();
+		  var role= $( ".edit_cc_currency_code option:selected" ).val();
+		  var isChecked = $('#prt_MainContact__c:checked').val()?true:false;
+    		 CCRZ.MyAccount = _.extend(CCRZ.MyAccount||{}); 
+             CCRZ.MyAccount.createEditCaseAction = _.extend({
+                className : 'c_Prt_ContactController',
                 EditCaseAction : function(callback)
                 {
-                    alert('click');
-                    this.invokeCtx('createEditCase',
+					this.invokeContainerLoadingCtx(
+                        $('.main_content_large_right_container'),
+                        'createEditCase',
+                        firstName,secondName,phone,email,mobile,role,isChecked,
+                        function(resp)
+                        {
+                         callback(resp); 
+                        },
+                        {   
+                          buffer : false, // this call will be executed by itself
+                          nmsp   : ''  // 'ccrz' defines that this is a call to a subscriber class
+                        }); // end invokeCtx call
+                 }
+           	},CCRZ.RemoteInvocation);
+            
+                var sendContact = CCRZ.MyAccount.createEditCaseAction.EditCaseAction(function(resp) {
+                console.log(resp);
+             	 location.reload();
+             
+            });
+            
+           
+        },
+
+		editEntity: function() {
+			var sfid = $("button.action--editContact").data('idedit'); 
+            console.log(CCRZ.MyAccount);
+            CCRZ.MyAccount = _.extend(CCRZ.MyAccount||{}); 
+            console.log(CCRZ.MyAccount);
+        
+            console.log(CCRZ.MyAccount.createEditCaseAction);
+            CCRZ.MyAccount.createEditCaseAction = _.extend({
+                className : 'c_Prt_ContactController',
+                EditCaseAction : function(callback)
+                {
+					console.log(this.invokeCtx);
+                     this.invokeCtx(
+                        'createEditCase',
+                        function(resp)
+                        {
+                            callback(resp); 
+                        },
+                        {   
+                            buffer : false, // this call will be executed by itself
+                            nmsp   : ''  // 'ccrz' defines that this is a call to a subscriber class
+                        }); // end invokeCtx call
+                 }
+           	},CCRZ.RemoteInvocation);
+            console.log(CCRZ.MyAccount.createEditCaseAction);
+            
+             
+            CCRZ.MyAccount.createEditUserAction = _.extend({
+                className : 'c_Prt_ContactController',
+                CreateUserAction : function(callback)
+                {
+                    // alert('click');
+                    console.log(this.invokeCtx);
+                    this.invokeCtx(
+                        'createUser',
                         function(resp)
                         {
                             callback(resp);
                         },
                         {
                             buffer : false, // this call will be executed by itself
-                            nmsp   : false  // defines that this is a call to a subscriber class
+                            nmsp   : ''  // 'ccrz' defines that this is a call to a subscriber class
                         }); // end invokeCtx call
                  }
            	},CCRZ.RemoteInvocation);
-           
+            console.log(CCRZ.MyAccount.createEditUserAction);
             
-           CCRZ.pubSub.on('view', function(EditDetailView) 
-             {
-          EditDetailView.EditCaseAction = function(event)  
-           {
-               CCRZ.subsc.createEditCaseAction.EditCaseAction(function(resp)
-                {
-                  if(resp && resp.success)
-                  {
-                      alert(resp);
-              
-                  }
-                });
-            };
-
-            //  SubscMyCompanyView.events['click .action--editContact'] = 'createEditCase'; 
-                 //   SubscMyCompanyView.delegateEvents(); 
-        });
-      $("#EditAccountMod").modal('show');
+            
+                var sendContact = CCRZ.MyAccount.createEditCaseAction.EditCaseAction(function(resp) {
+                console.log(resp);
+            });
+            
+            /* var sendUser = CCRZ.MyAccount.createEditUserAction.CreateUserAction(function(resp) {
+                console.log(resp);
+            });
+            */
+            /*
+            CCRZ.pubSub.on('view:myCustomThing', function(EditDetailView) 
+            {
+               EditDetailView.EditCaseAction = function(event)  
+               {
+                   console.log('sono dentro');
+                   CCRZ.MyAccount.createEditCaseAction.EditCaseAction(function(resp)
+                    {
+                      if(resp && resp.success)
+                      { 
+                          alert(resp);
+                      }
+                    });
+                }; 
+	        });
+            CCRZ.pubSub.trigger('view:myCustomThing', true);
+            */
+            /*
+            var testdata={key:'value',key2:'value2'};
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.c_Prt_ContactController.createEditCase}',
+                testdata, 
+                function(result, event){
+                    if (event.status) {
+                        console.log(result);//print the log and inspect console to see result returned in form of JS object.You can generate string from JSON object using stringify
+                        console.log(JSON.stringify(result));
+                        alert('sono dentro');
+                    } else if (event.type === 'exception') {
+                    } else {
+                    }
+                }, 
+                {escape: true}
+            );  
+            */
+            $("#EditAccountMod").modal('show');
 		},
 
 		renderPhone : function() {
@@ -191,7 +275,53 @@ CCRZ.pubSub.trigger("view:myaccountView:subViewInit", true);
 CCRZ.uiProperties.contactInfoView.desktop.tmpl = 'CCTrainingMyAccount-ContactInformation-Desktop'; 
 CCRZ.uiProperties.contactInfoEditView.desktop.tmpl = 'CCTrainingMyAccount-ContactInformationEdit-Desktop'; 
 CCRZ.uiProperties.myAccountNavView.desktop.tmpl = "Partesa-MyAccount-Nav-Desktop";   	
+CCRZ.uiProperties.myAccountChangePasswordView.desktop.tmpl = "Partesa-MyAccount-Change-Password";   	
+    
 </script>
+    
+    <script id="Partesa-MyAccount-Change-Password" type="text/template">   
+   <div class="panel panel-default cc_panel cc_myaccount_changePassword">
+   <div class="panel-heading cc_heading">
+    <h3 class="panel-title cc_title">{{pageLabelMap 'MyAccount_ChangePassword'}}</h3>
+   </div>
+   <div class="panel-body cc_body">
+    <p class="cc_password_requirements">{{pageLabelMap 'MyAccount_ChangePassword_Instructions'}}</p>
+    <p class="page_message error_change_password help-block has-error cc_has_error"></p>
+    <form class="form form-horizontal login_item_container desktop_resetForm cc_reset_password_form" id="resetForm">
+     <div class="form-group cc_currentpassword">
+      <label class="col-xs-3 cc_current_password_label" for="current_password">
+       <span class="required cc_required">{{pageLabelMap 'MyAccount_ChangePassword_Current_Password'}}</span>
+      </label>
+      <div class="col-xs-9 cc_current_password_value">
+       <input type="password" class="current_password form-control cc_current_password" id="current_password" name="current_password" value="">
+       <span class="page_message error_current_password help-block has-error cc_has_error"></span>
+      </div>
+     </div>
+     <div class="form-group cc_newpassword">
+      <label class="col-xs-3 cc_new_password_label" for="new_password">
+       <span class="required cc_required">{{pageLabelMap 'MyAccount_ChangePassword_New_Password'}}</span>
+      </label>
+      <div class="col-xs-9 cc_new_password_value">
+       <input type="password" class="form-control cc_new_password" id="new_password" name="new_password" value="">
+       <span class="page_message error_new_password help-block has-error cc_has_error"></span>
+      </div>
+     </div>
+     <div class="form-group cc_newpasswordconfirm">
+      <label class="col-xs-3 cc_newpasswordconfirm_label" for="new_password_verify">
+       <span class="required cc_required">{{pageLabelMap 'MyAccount_ChangePassword_Confirm_New_Password'}} </span>
+      </label>
+      <div class="col-xs-9 cc_newpasswordconfirm_value">
+       <input type="password" class="form-control cc_new_password_verify" id="new_password_verify" name="new_password_verify" value="">
+       <span class="page_message error_verify_new_password help-block has-error cc_has_error"></span>
+      </div>
+     </div>
+     <div class="cc_form_buttons">
+      <input class="btn btn-default btn-sm updatepassword cc_update_password" type="button" value="{{pageLabelMap 'MyAccount_ChangePassword_Submit'}}" id="submit" alt="{{pageLabelMap 'MyAccount_ChangePassword_Submit'}}">
+     </div>
+    </form>
+   </div>
+  </div>
+          </script>
     
     
 <script id="Partesa-MyAccount-Nav-Desktop" type="text/template">
@@ -314,7 +444,64 @@ CCRZ.uiProperties.myAccountNavView.desktop.tmpl = "Partesa-MyAccount-Nav-Desktop
 			<div class="form-group">
 			 <label class="cc_contact_input_email_label" for="email">{{pageLabelMap 'MyAccount_Profile_Email_Edit'}}</label>
 			 <input id="email" type="email" class="form-control contactInput cc_contact_input_email" name="emailAddress" value="{{emailAddress}}" maxlength=40 />
+			</div> 
+            
+            <div class="form-group" style="display:none">     
+            <div class="form-group">
+			 <label class="cc_contact_input_firstname_label" for="firstNameField"> {{pageLabelMap 'MyAccount_Profile_FirstName'}}</label>
+    <input id="firstNameField" type="text" class="form-control contactInput cc_contact_input_firstname" name="firstName" maxlength=40 value=" {{userFirstName}}" /> 
 			</div>
+            <div class="form-group">
+			 <label class="cc_contact_input_lastname_label" for="lastNameField"> {{pageLabelMap 'MyAccount_Profile_LastName'}}</label>
+        <input id="lastNameField" type="text" class="form-control contactInput cc_contact_input_lastname" name="lastName" maxlength=40 value=" {{userLastName}}" />
+			</div>
+            <div class="form-group">
+			 <label class="cc_contact_input_phone_label" for="homePhoneField"> {{pageLabelMap 'MyAccount_Profile_Phone_Edit'}}</label>
+            <input id="homePhoneField" type="text" class="form-control contactInput cc_contact_input_phone" name="phone" maxlength=40 value="{!mobilePhone}" />
+			</div>
+            <div class="form-group">
+			 <label class="cc_contact_input_street_label" for="street">{{pageLabelMap 'MyAccount_Profile_MalingStreet_Edit'}}</label>
+                <input id="street" type="text" class="form-control contactInput cc_contact_input_street" name="mailingAddress.street" maxlength=40 value="-" />
+			</div>
+            <div class="form-group">
+			 <label class="cc_contact_input_city_label" for="city">{{pageLabelMap 'MyAccount_Profile_MailingCity_Edit'}}</label>
+                    <input id="city" type="text" class="form-control contactInput cc_contact_input_city" name="mailingAddress.city" maxlength=40 value="-" />
+			</div>
+            <div class="form-group">
+			 <label class="cc_contact_input_zip_label" for="postalCode">{{pageLabelMap 'MyAccount_Profile_MalingZip_Edit'}}</label>
+                                <input id="postalCode" type="text" class="form-control contactInput cc_contact_input_zip" name="mailingAddress.postalCode" maxlength=40 value="-" />
+			</div>
+            <div class="form-group">
+			 <label class="cc_contact_input_otherstreet_label" for="otherStreet"> {{pageLabelMap 'MyAccount_Profile_OtherStreet_Edit'}}</label>
+                                        <input id="otherStreet" type="text" class="form-control contactInput cc_contact_input_otherstreet" name="otherAddress.street" maxlength=40 value="-" />
+			</div>
+            <div class="form-group">
+			 <label class="cc_contact_input_othercity_label" for="otherCity"> {{pageLabelMap 'MyAccount_Profile_OtherCity_Edit'}}</label>
+                                            <input id="otherCity" type="text" class="form-control contactInput cc_contact_input_othercity" name="otherAddress.city" maxlength=40 value="-" />
+			</div>
+            <div class="form-group">
+			 <label class="cc_contact_input_other_zip_label" for="otherPostalCode"> {{pageLabelMap 'MyAccount_Profile_OtherZip_Edit'}}</label>
+                                                        <input id="otherPostalCode" type="text" class="form-control contactInput cc_contact_input_zip" name="otherAddress.postalCode" maxlength=40 value="-" />
+			</div>
+            <div class="form-group">
+			 <label class="cc_contact_input_state_label" for="state">{{pageLabelMap 'MyAccount_Profile_MalingState_Edit'}}</label>
+                                   <div class="mailingStateSection" />
+			</div>
+            <div class="form-group">
+			 <label class="cc_contact_input_otherstate_label" for="otherState"> {{pageLabelMap 'MyAccount_Profile_OtherState_Edit'}}</label>
+                                                        <div class="otherStateSection" />
+			</div>
+            <div class="form-group">
+			 <label class="cc_contact_input_country_label" for="country">{{pageLabelMap 'MyAccount_Profile_MailingCountry_Edit'}}</label>
+                                       {{{selectGeo 'country' countryList contactBean.mailingAddress.country 'mailing countryListing form-control' 'mailingAddress.'}}}
+			</div>
+            <div class="form-group">
+			 <label class="cc_contact_input_other_country_label" for="otherCountry"> {{pageLabelMap 'MyAccount_Profile_OtherCountry_Edit'}}</label>
+                                                            {{{selectGeo 'country' countryList contactBean.otherAddress.country 'other countryListing form-control cc_contact_input_other_country' 'otherAddress.'}}}
+			</div>
+                 </div>
+                 
+                 
 			<div class="form-group" style="display:none">
 			 <label class="cc_contact_input_language_label" for="language">{{pageLabelMap 'MyAccount_Profile_Language_Edit'}}</label>
 			 <select name="language" value="{{this.language}}" class="form-control cc_user_language">

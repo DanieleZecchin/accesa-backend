@@ -6,15 +6,17 @@ trigger C_updateContactTrigger on User (before update) {
     
     for (User u : trigger.new ){
         system.debug(u.Id);
-        for (User us : standardProfileUsers){
-            if(us.Id == u.Id){
-                system.debug('begin if');
-                ctc.Id = u.ContactId;
-                ctc.FirstName = u.FirstName;
-                ctc.LastName = u.LastName;
-                ctc.MobilePhone = u.MobilePhone;
-                ctc.Email = u.Email;
-                ctcList.add(ctc);
+        if(u.IsActive){
+            for (User us : standardProfileUsers){
+                if(us.Id == u.Id){
+                    system.debug('begin if');
+                    ctc.Id = u.ContactId;
+                    ctc.FirstName = u.FirstName;
+                    ctc.LastName = u.LastName;
+                    ctc.Phone = u.Phone;
+                    ctc.Email = u.Email;
+                    ctcList.add(ctc);
+                }
             }
         }
     }

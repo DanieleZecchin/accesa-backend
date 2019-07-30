@@ -17,7 +17,7 @@
                 <td class="table__data data--role"><apex:outputText value="{!item.prt_Function__c}" /></td>
                 <td class="table__data data--record-actions">
                     <button class="action action--editContact" data-idedit="mattia">{{pageLabelMap 'prt_MyAccount_Button_Edit'}}</button>
-                	<button class="action action--revoke">Revoke</button>
+                	<button class="action action--revoke">{{pageLabelMap 'prt_MyAccount_Button_Revoke'}}</button>
                 </td>
             </tr>
            

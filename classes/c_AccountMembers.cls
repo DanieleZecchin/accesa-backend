@@ -2,13 +2,16 @@ public with sharing class c_AccountMembers
 {
     public  List<Map<String, Object>> contactList {get; set;}
     public  List<Contact> contacts {get; set;}
+    public String userId {get; set;}
+    public String userName {get; set;}
     //public List<Map<String, Object>> userList {get; set;}
     
     
     public c_AccountMembers (){
         
         contactList = new List<Map<String, Object>>();
-        contacts = new List<Contact>(); 
+        contacts = new List<Contact>();
+        User userDetails = new User();
        Contact details= new Contact();
         Map<String,Object> inputData = new Map<String,Object> {
             ccrz.ccApi.API_VERSION => ccrz.ccApi.CURRENT_VERSION,
@@ -27,10 +30,13 @@ public with sharing class c_AccountMembers
             String Mapemail=JSON.serialize(contactmap.get('email')).replace('"','');
             String MapPhone=JSON.serialize(contactmap.get('phone')).replace('"','');
             details = [SELECT prt_ECOM__c, prt_ECOMSecurityLevel__c, prt_MainContact__c,prt_Status__c FROM Contact WHERE Id =: Mapcontid ];
+            //userDetails = [SELECT Id, Username FROM User WHERE ContactId =: Mapcontid];
+            //userId = userDetails.Id;
+            //userName = userDetails.Username;
             if((details.prt_Status__c=='A') && (details.prt_ECOM__c)){
              String rolefunc= functionMap(details.prt_ECOMSecurityLevel__c);
-            Contact a = new Contact(FirstName=MapName,lastName=MapLast,phone=MapPhone, email=Mapemail, prt_Function__c=rolefunc, prt_MainContact__c=details.prt_MainContact__c );
-            contacts.add(a);		
+            Contact a = new Contact(Id=Mapcontid, FirstName=MapName,lastName=MapLast,phone=MapPhone, email=Mapemail, prt_Function__c=rolefunc, prt_MainContact__c=details.prt_MainContact__c );
+            contacts.add(a);
             }
         }
     }
@@ -56,23 +62,25 @@ public with sharing class c_AccountMembers
     
     /*@RemoteAction
     public static void revokeMember(){
-        List<Map<String, Object>> userList = null;
-        Map<String,Object> inputData = new Map<String,Object> {
-            ccrz.ccApi.API_VERSION => ccrz.ccApi.CURRENT_VERSION,
-                ccrz.ccAPIUser.USER_Id =>ccrz.cc_CallContext.currUserId
-                };      
-                    Map<String, Object> outputData = ccrz.ccAPIUser.fetch(inputData);
         
-        if (outputData.get(ccrz.ccAPIUser.USERLIST) != null) {
-            userList = (List<Map<String, Object>>) outputData.get(ccrz.ccAPIUser.USERLIST);
-            system.debug(userList);
-        }
-        
-        Map<String, Object> userMap = userList[0];
-        String userId=JSON.serialize(userMap.get('sfid')).replace('"','');
-        
-        List<User> updatedUser = [SELECT IsActive FROM User WHERE Id =: userId];
-        updatedUser[0].IsActive = false;
-        update updatedUser;
+List<Map<String, Object>> userList = null;
+Map<String,Object> inputData = new Map<String,Object> {
+ccrz.ccApi.API_VERSION => ccrz.ccApi.CURRENT_VERSION,
+ccrz.ccAPIUser.USER_Id =>ccrz.cc_CallContext.currUserId
+};      
+Map<String, Object> outputData = ccrz.ccAPIUser.fetch(inputData);
+
+if (outputData.get(ccrz.ccAPIUser.USERLIST) != null) {
+userList = (List<Map<String, Object>>) outputData.get(ccrz.ccAPIUser.USERLIST);
+system.debug(userList);
+}
+
+Map<String, Object> userMap = userList[0];
+String userId=JSON.serialize(userMap.get('sfid')).replace('"','');
+
+List<User> updatedUser = [SELECT IsActive FROM User WHERE Id =: userId];
+updatedUser[0].IsActive = false;
+update updatedUser;
+
     }*/
 }
