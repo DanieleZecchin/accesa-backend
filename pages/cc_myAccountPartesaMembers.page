@@ -1,5 +1,5 @@
 <apex:page controller="c_AccountMembers" applyHtmlTag="false" sidebar="false" showHeader="false" standardStylesheets="false" >
-  
+ 
     <table class="table table--user-management">
         <thead>
             <tr class="table__head">
@@ -16,8 +16,9 @@
                 <td class="table__data data--is-main-user"> <apex:outputText rendered="{!item.prt_MainContact__c=true}">✓</apex:outputText> </td>
                 <td class="table__data data--role"><apex:outputText value="{!item.prt_Function__c}" /></td>
                 <td class="table__data data--record-actions">
-                    <button class="action action--editContact" data-idedit="mattia">{{pageLabelMap 'prt_MyAccount_Button_Edit'}}</button>
-                	<button class="action action--revoke">{{pageLabelMap 'prt_MyAccount_Button_Revoke'}}</button>
+                    <button class="action action--editContact" data-maincontact="{!item.prt_MainContact__c}" data-email="{!item.email}" data-phone="{!item.Phone}" data-mobile="{!item.MobilePhone}" data-editrole="{!item.prt_ECOMSecurityLevel__c}" data-idedit="{!item.Id}" data-rolestring="{!item.prt_Function__c}" data-name="{!item.firstname}" data-last="{!item.lastname}">{{pageLabelMap 'prt_MyAccount_Button_Edit'}}</button>
+                
+                    <button  style="display: {!IF(contact.Id != item.Id, 'block', 'none')};" class="action action--revoke" data-idrem="{!item.Id}" >{{pageLabelMap 'prt_MyAccount_Button_Revoke'}}</button>
                 </td>
             </tr>
            

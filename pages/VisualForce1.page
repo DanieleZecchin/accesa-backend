@@ -1,15 +1,13 @@
-<apex:page id="VisualForce1" docType="html-5.0"
-  sidebar="false" showHeader="false"
-  standardStylesheets="false" applyHtmlTag="false">
-
-  <!-- HTML CONTAINER -->   
+<apex:page id="VisualForce1" docType="html-5.0" sidebar="false" showHeader="false" standardStylesheets="false" applyHtmlTag="false">
+  <!-- HTML CONTAINER -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet" />
   <script>
   console.log('jQuery', $ ? '' : ' not', ' loaded');
   $('<script>')
     .appendTo(document.head)
     .attr('src', 'https://danielezecchin.github.io/accesa-frontend/js/main.js')
   ;
-    
+  
   $('<style>')
     .appendTo(document.head)
     .load('https://danielezecchin.github.io/accesa-frontend/css/main.css')

@@ -4,7 +4,8 @@ public with sharing class c_AccountMembers
     public  List<Contact> contacts {get; set;}
     public String userId {get; set;}
     public String userName {get; set;}
-    //public List<Map<String, Object>> userList {get; set;}
+    User userDetails{get; set;}
+    public Contact contact {get; set;}//public List<Map<String, Object>> userList {get; set;}
     
     
     public c_AccountMembers (){
@@ -29,13 +30,17 @@ public with sharing class c_AccountMembers
             String MapLast=JSON.serialize(contactmap.get('lastName')).replace('"','');
             String Mapemail=JSON.serialize(contactmap.get('email')).replace('"','');
             String MapPhone=JSON.serialize(contactmap.get('phone')).replace('"','');
-            details = [SELECT prt_ECOM__c, prt_ECOMSecurityLevel__c, prt_MainContact__c,prt_Status__c FROM Contact WHERE Id =: Mapcontid ];
-            //userDetails = [SELECT Id, Username FROM User WHERE ContactId =: Mapcontid];
-            //userId = userDetails.Id;
+            details = [SELECT id, prt_ECOM__c, prt_ECOMSecurityLevel__c,MobilePhone, prt_MainContact__c,prt_Status__c FROM Contact WHERE Id =: Mapcontid ];
+           // try{ 
+           //     userDetails = [SELECT Id, Username FROM User WHERE ContactId =: ccrz.cc_CallContext.currContactId];
+           // } catch (Exception e) {
+            //    system.debug(e.getMessage());
+            //}
+             contact =  ccrz.cc_CallContext.currContact;
             //userName = userDetails.Username;
             if((details.prt_Status__c=='A') && (details.prt_ECOM__c)){
              String rolefunc= functionMap(details.prt_ECOMSecurityLevel__c);
-            Contact a = new Contact(Id=Mapcontid, FirstName=MapName,lastName=MapLast,phone=MapPhone, email=Mapemail, prt_Function__c=rolefunc, prt_MainContact__c=details.prt_MainContact__c );
+            Contact a = new Contact(Id=Mapcontid, FirstName=MapName, MobilePhone=details.MobilePhone, prt_ECOMSecurityLevel__c= details.prt_ECOMSecurityLevel__c, lastName=MapLast, phone=MapPhone, email=Mapemail, prt_Function__c=rolefunc, prt_MainContact__c=details.prt_MainContact__c );
             contacts.add(a);
             }
         }

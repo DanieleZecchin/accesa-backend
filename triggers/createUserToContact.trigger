@@ -1,4 +1,28 @@
-trigger createUserToContact on Contact (after update, after insert) {
+trigger createUserToContact on Contact (after update) {
+    
+    List<User> userList = new List<User>();
+    User u = new User();
+    Map<Id,Profile> profileIds = new Map<id,profile>([SELECT Id,UserLicenseId FROM Profile where UserLicenseId  in (SELECT Id FROM UserLicense where name ='Customer Community Plus')]);
+    List<user> standardProfileUsers = [select id, ContactId from user where profileId in:profileIds.Keyset()];
+    
+    for (Contact ctc : trigger.new ){
+        system.debug(ctc.Id);
+        for (User us : standardProfileUsers){
+            if(us.ContactId == ctc.Id){
+                u.Id = us.Id;
+                u.ContactId = ctc.Id;
+                u.FirstName = ctc.FirstName;
+                u.LastName = ctc.LastName;
+                u.MobilePhone = ctc.MobilePhone;
+                u.Phone = ctc.Phone;
+                u.Email = ctc.Email;
+                userList.add(u);
+            }
+        }
+    }
+    
+    
+    update userList;
 /*
     List <User> newUser1 = new List<User>();//list to perfrom DML outside of loop
     //set to contain only ESS_User__c = true contacts

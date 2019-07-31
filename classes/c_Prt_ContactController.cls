@@ -8,40 +8,52 @@ global class c_Prt_ContactController {
     
     global c_Prt_ContactController(){
         List<Contact> user = [SELECT FirstName, LastName, Email, MobilePhone, Phone FROM Contact WHERE Id IN (SELECT ContactId FROM User WHERE Id =: UserInfo.getUserId())];
-        mobilePhone = user[0].Phone;
+        mobilePhone = user[0].MobilePhone;
         firstName = user[0].FirstName;
         lastName = user[0].LastName;
         email = user[0].Email;
     }
     
-    
-    public void updateUser(){
-        /*List<Map<String, Object>> userList = null;
-        Map<String,Object> inputData = new Map<String,Object> {
-            ccrz.ccApi.API_VERSION => ccrz.ccApi.CURRENT_VERSION,
-                ccrz.ccAPIUser.USER_DATA_MAP => null
-                };      
-                    Map<String, Object> outputData = ccrz.ccAPIUser.updateProfileData(inputData);*/
-        /*
-        List<User> user = [SELECT FirstName, LastName, MobilePhone, Email FROM User WHERE Id =: UserInfo.getUserId()];
-        User u = user[0];
+    //@RemoteAction
+    global pagereference editContact(){
+        system.debug('start edit contact');
+        List<Contact> contacts = [SELECT Id, FirstName, LastName, MobilePhone, Email FROM Contact WHERE Id IN (SELECT ContactId FROM User WHERE Id =: UserInfo.getUserId())];
+        List<Contact> updateContacts = new List<Contact>();
+        Contact con = contacts[0];
+        con.FirstName = firstName;
+        con.LastName = lastName;
+        con.Email = email;
+        con.MobilePhone = mobilephone;
         
-        u.FirstName = firstName;
-        u.LastName = lastName;
-        u.MobilePhone = mobilePhone;
-        u.Email = email;
-        
-        update u;*/
+        updateContacts.add(con);
+        update updateContacts;
+        return null;
     }
     
     @RemoteAction
-    global static String editMembers(map<string,Object> inputmap) {
-        Map<String,Object> inputData = new Map<String,Object> {
+    global static Object editMembersCompany(final ccrz.cc_RemoteActionContext ctx, String sfid,  String firstName, String secondName, String phone, String email, String mobile, String role,Boolean isChecked) {
+	 Contact details= new Contact();
+     Map<String,Object> inputData = new Map<String,Object> {
             ccrz.ccApi.API_VERSION => ccrz.ccApi.CURRENT_VERSION,
-                ccrz.ccAPIContact.ACCOUNTID =>ccrz.cc_CallContext.currAccountId,
-                ccrz.ccApiUser.USER_REGISTER_JSON=> '{"userFirstName":"text","alias":"fcrotti",userLastName":"textdsa2","userPhone":"111111111","emailAddress":"text4@gf.it"}'
+            ccrz.ccAPIContact.ACCOUNTID =>ccrz.cc_CallContext.currAccountId
                 };	
-                    return 'entrato';
+    try {
+
+      details = [SELECT firstName,lastName, Phone, email, prt_ECOM__c, prt_ECOMSecurityLevel__c,MobilePhone, prt_MainContact__c FROM Contact WHERE Id =: sfid ];
+      details.firstName=firstName;
+      details.lastName=secondName;
+      details.Phone=phone;
+      details.email=email;
+      details.prt_ECOMSecurityLevel__c=role;
+      details.prt_MainContact__c=isChecked;
+      details.MobilePhone=mobile;    
+      update details;
+  		return details;
+    	} catch(DmlException e) {
+     return 'An unexpected error has occurred: ' + e.getMessage();
+	}
+                   
+       
     }
     
      @RemoteAction
@@ -49,7 +61,7 @@ global class c_Prt_ContactController {
     ccrz.cc_RemoteActionResult res = ccrz.cc_CallContext.init(ctx); 
     
         try {
-             Account Acc =  [select id from account where id=: ccrz.cc_CallContext.currAccountId];
+            Account Acc =  [select id from account where id=: ccrz.cc_CallContext.currAccountId];
             Contact NewContact = new Contact (
 			FirstName = firstName, 
 			LastName = secondName,
@@ -57,14 +69,13 @@ global class c_Prt_ContactController {
             Phone = phone,
             MobilePhone = mobile,    
 			Email = email,
-            prt_Status__c='A',    
+            prt_Status__c='A',
+            prt_ECOM__c=true,    
             prt_ECOMSecurityLevel__c=role,
             prt_MainContact__c=isChecked
 			);
             insert NewContact;
-	
-            
-           
+	     
             User usr = new User(LastName = secondName,
                    FirstName=firstName,
                    Alias = 'firstn',
@@ -75,81 +86,27 @@ global class c_Prt_ContactController {
                    TimeZoneSidKey = 'GMT',
                    LanguageLocaleKey = 'IT',
                    EmailEncodingKey = 'UTF-8',
-                  LocaleSidKey = 'IT'
+                   LocaleSidKey = 'IT'
                    );
 		/*Database.DMLOptions dlo=new Database.DMLOptions();
 		dlo.EmailHeader.triggerUserEmail =true;
 		dlo.EmailHeader.triggerAutoResponseEmail=true;
 		usr.setOptions(dlo);
        	*/
-            insert  usr;
-            return NewContact.Id;
-	}
+        insert  usr;
+        res.data = NewContact.Id;
+        res.success = true;
+        return res;
+		}
         
          catch(Exception e)
         {
-        return e.getMessage();
+        res.data = e.getMessage();
+        res.success = false;
+        return res;     
         }
         
     }
      
     
-         @RemoteAction
-    global static Object createUser(final ccrz.cc_RemoteActionContext ctx, String hiddenidsfdc){
-    ccrz.cc_RemoteActionResult res = ccrz.cc_CallContext.init(ctx); 
-    	
-        try {/*
-    		User usr = new User(LastName = 'Andrea',
-                   FirstName='Andreucci',
-                   Alias = 'andreuc',
-                  ContactId = '0036E00000joVPYQA2',
-                  Email = 'andreucci@asdf.com',
-                   Username = 'andreucci@asdf.com',
-                   ProfileId = '00e6E000000QVgx',
-                   TimeZoneSidKey = 'GMT',
-                   LanguageLocaleKey = 'IT',
-                   EmailEncodingKey = 'UTF-8',
-                  LocaleSidKey = 'IT'
-                   );
-
-       insert  usr;
-      */ return hiddenidsfdc;
-}		
-        
-         catch(Exception e)
-        {
-            system.debug(e);
-        return e.getMessage();
-        }
-        
-    }
-  
-    /*public Static User Updateutente(){
-        
-        List<User> user = [SELECT IsActive FROM User WHERE Id = '0056E000004rqMtQAI'];
-       User u = user[0];       
-        u.IsActive = false;
-		return u;
-            
-    }*/    
-    /*global static void revokeMember(map<string,Object> inputmap){
-List<Map<String, Object>> userList = null;
-Map<String,Object> inputData = new Map<String,Object> {
-ccrz.ccApi.API_VERSION => ccrz.ccApi.CURRENT_VERSION,
-ccrz.ccAPIUser.USER_Id =>ccrz.cc_CallContext.currUserId
-};      
-Map<String, Object> outputData = ccrz.ccAPIUser.fetch(inputData);
-
-if (outputData.get(ccrz.ccAPIUser.USERLIST) != null) {
-userList = (List<Map<String, Object>>) outputData.get(ccrz.ccAPIUser.USERLIST);
-system.debug(userList);
-}
-
-Map<String, Object> userMap = userList[0];
-String userId=JSON.serialize(userMap.get('sfid')).replace('"','');
-
-List<User> updatedUser = [SELECT IsActive FROM User WHERE Id =: userId];
-updatedUser[0].IsActive = false;
-update updatedUser;
-}*/
 }

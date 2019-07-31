@@ -44,10 +44,17 @@ jQuery(function($) {
 			"click .cc_register_modal" : "createEntity",
 			"click .action--editContact" : "editEntity",
             "click .cc_contact_edit_profile" : "createSubmitEntity",
+            "click .createEditCase" : "editSubmitEntity",
+            "click .action--revoke" : "revokeUser"
 		},
 		createEntity: function() {
          	$("#createAccountMod").modal('show');
 		}, 
+        
+        revokeUser: function() {
+         	  var sfid = $("button.action--revoke").data('idrem'); 
+				console.log(sfid);
+        }, 
         
         createSubmitEntity: function() {
           var firstName= $('#edituserFirstName').val();
@@ -79,16 +86,30 @@ jQuery(function($) {
             
                 var sendContact = CCRZ.MyAccount.createEditCaseAction.EditCaseAction(function(resp) {
                 console.log(resp);
-             	 location.reload();
+                if(resp && resp.success)
+                   { 
+                   alert(resp);
+                   }
+                  
+                 $("#createAccountMod").modal('hide');    
+             	 CCRZ.myaccountView.gotoSection(2); 
              
             });
             
            
         },
-
-		editEntity: function() {
-			var sfid = $("button.action--editContact").data('idedit'); 
-            console.log(CCRZ.MyAccount);
+        
+        editSubmitEntity: function() {
+          var sfid = $("button.action--editContact").data('idedit'); 
+           console.log('sono entrato nella funzione'+sfid);
+          var firstName= $('#userFirstName').val();
+			var secondName= $('#userLastName').val();
+			var phone= $('#userPhone').val();
+			var email =$('#email').val();
+			var mobile =$('#MobilePhone').val();
+			var role= $( ".edit_cc_currency_code option:selected" ).val();
+			var isChecked = $('#prt_MainContact__c:checked').val()?true:false;			  
+          console.log(CCRZ.MyAccount);
             CCRZ.MyAccount = _.extend(CCRZ.MyAccount||{}); 
             console.log(CCRZ.MyAccount);
         
@@ -97,12 +118,13 @@ jQuery(function($) {
                 className : 'c_Prt_ContactController',
                 EditCaseAction : function(callback)
                 {
-					console.log(this.invokeCtx);
-                     this.invokeCtx(
-                        'createEditCase',
+					this.invokeContainerLoadingCtx(
+                        $('.main_content_large_right_container'),
+                        'editMembersCompany',
+                        sfid,firstName,secondName,phone,email,mobile,role,isChecked,
                         function(resp)
                         {
-                            callback(resp); 
+                         callback(resp); 
                         },
                         {   
                             buffer : false, // this call will be executed by itself
@@ -113,35 +135,38 @@ jQuery(function($) {
             console.log(CCRZ.MyAccount.createEditCaseAction);
             
              
-            CCRZ.MyAccount.createEditUserAction = _.extend({
-                className : 'c_Prt_ContactController',
-                CreateUserAction : function(callback)
-                {
-                    // alert('click');
-                    console.log(this.invokeCtx);
-                    this.invokeCtx(
-                        'createUser',
-                        function(resp)
-                        {
-                            callback(resp);
-                        },
-                        {
-                            buffer : false, // this call will be executed by itself
-                            nmsp   : ''  // 'ccrz' defines that this is a call to a subscriber class
-                        }); // end invokeCtx call
-                 }
-           	},CCRZ.RemoteInvocation);
-            console.log(CCRZ.MyAccount.createEditUserAction);
-            
             
                 var sendContact = CCRZ.MyAccount.createEditCaseAction.EditCaseAction(function(resp) {
                 console.log(resp);
             });
+              
             
-            /* var sendUser = CCRZ.MyAccount.createEditUserAction.CreateUserAction(function(resp) {
-                console.log(resp);
-            });
-            */
+        },
+
+		editEntity: function() {
+			 var name = $("button.action--editContact").data('name'); 
+            var lastname = $("button.action--editContact").data('last'); 
+         	var rolestring = $("button.action--editContact").data('rolestring'); 
+            var email = $("button.action--editContact").data('email'); 
+            var mobile = $("button.action--editContact").data('mobile'); 
+            var roleid = $("button.action--editContact").data('editrole'); 
+         	var maincontact = $("button.action--editContact").data('maincontact'); 
+         	console.log(maincontact);
+            var phone = $("button.action--editContact").data('phone'); 
+            
+         	 $('#userFirstName').val(name);
+            $('#userLastName').val(lastname);
+            		$('#userPhone').val(phone);
+    		$('#email').val(email);
+			$('#MobilePhone').val(mobile);
+			$('.cc_currency_code').val(roleid);
+			$("#prt_MainContact__c").prop("checked", maincontact);
+    		
+			
+			
+			
+		   
+            $("#EditAccountMod").modal('show'); 
             /*
             CCRZ.pubSub.on('view:myCustomThing', function(EditDetailView) 
             {
@@ -176,7 +201,7 @@ jQuery(function($) {
                 {escape: true}
             );  
             */
-            $("#EditAccountMod").modal('show');
+           
 		},
 
 		renderPhone : function() {
@@ -493,11 +518,11 @@ CCRZ.uiProperties.myAccountChangePasswordView.desktop.tmpl = "Partesa-MyAccount-
 			</div>
             <div class="form-group">
 			 <label class="cc_contact_input_country_label" for="country">{{pageLabelMap 'MyAccount_Profile_MailingCountry_Edit'}}</label>
-                                       {{{selectGeo 'country' countryList contactBean.mailingAddress.country 'mailing countryListing form-control' 'mailingAddress.'}}}
+            {{{selectGeo 'country' countryList contactBean.mailingAddress.country 'mailing countryListing form-control' 'mailingAddress.'}}}
 			</div>
             <div class="form-group">
 			 <label class="cc_contact_input_other_country_label" for="otherCountry"> {{pageLabelMap 'MyAccount_Profile_OtherCountry_Edit'}}</label>
-                                                            {{{selectGeo 'country' countryList contactBean.otherAddress.country 'other countryListing form-control cc_contact_input_other_country' 'otherAddress.'}}}
+             {{{selectGeo 'country' countryList contactBean.otherAddress.country 'other countryListing form-control cc_contact_input_other_country' 'otherAddress.'}}}
 			</div>
                  </div>
                  
@@ -527,9 +552,10 @@ CCRZ.uiProperties.myAccountChangePasswordView.desktop.tmpl = "Partesa-MyAccount-
 			 </select>
 			</div>
 		</div>
+                 
 		<div class="form-group">
 			<input type="button" class="btn btn-default btn-sm closeEditProfile cc_close_edit_profile" value="{{pageLabelMap 'Cancel'}}" />
-			<input type="button" class="btn btn-default btn-sm updateProfile cc_update_profile" value="{{pageLabelMap 'Save'}}" />
+      <input type="button" class="btn btn-default btn-sm updateProfile cc_update_profile" value="{{pageLabelMap 'Save'}}" />
 		</div>       
 	</div>
 	</div>
